@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/garfeng/easyGUI/core/data"
+	"github.com/garfeng/easyGUI/core/model"
 	"github.com/invopop/jsonschema"
 	"os"
 )
@@ -14,19 +14,22 @@ var (
 	cfgPath     = flag.String("c", "config.json", "config file")
 )
 
-func Parse(v interface{}) error {
+func Parse(v interface{}, options model.AppOptions) error {
 	flag.Parse()
 	if *isGetSchema {
-		printSchema(v)
+		printSchema(v, options)
 		os.Exit(0)
+		return nil
 	}
 
-	return data.LoadJSONObject(*cfgPath, v)
+	return model.LoadJSONObject(*cfgPath, v)
 }
 
-func printSchema(v interface{}) {
+func printSchema(v interface{}, options model.AppOptions) {
 	s, err := getSchema(v)
-	status := &data.ExecStatus{}
+	status := &model.AppInfo{
+		AppOptions: options,
+	}
 	if err != nil {
 		status.Code = -1
 		status.Error = err.Error()

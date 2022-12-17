@@ -3,3 +3,7 @@ frontend/dist
 frontend/node_modules
 vendor/
 .idea/
+yarn.lock
+*.log
+tmpCfg*
+*.exe

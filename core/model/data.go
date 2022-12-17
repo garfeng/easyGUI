@@ -1,14 +1,20 @@
-package data
+package model
 
 import (
 	"encoding/json"
 	"io/ioutil"
 )
 
-type ExecStatus struct {
-	Code   int    `json:"code"`
-	Schema string `json:"schema"`
-	Error  string `json:"error"`
+type AppInfo struct {
+	Code       int        `json:"code"`
+	Schema     string     `json:"schema"`
+	AppOptions AppOptions `json:"appOptions"`
+	Error      string     `json:"error"`
+}
+
+type AppOptions struct {
+	AppTitle string `json:"appTitle"`
+	Version  string `json:"version"`
 }
 
 func LoadJSONObject(name string, v interface{}) error {
