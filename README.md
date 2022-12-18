@@ -2,7 +2,7 @@
 
 【[简体中文](./doc/zh-cn.md)】
 
-Is a tool to provide simple human interface for Go CMD APPS. 
+Is a tool to provide simple human interface for Go CMD APPS.
 
 - [x] Load struct from config.
 - [x] Support [urfave/cli](https://github.com/urfave/cli).
@@ -48,16 +48,16 @@ The `json-schema` is reflected from a struct :
 
 ``` go
 type Args struct {
-	Id   int    `json:"id" jsonschema:"title=UID,description=用户 ID(should be > 0),required"`
-	Name string `json:"name" jsonschema:"title=用户名(Username),required"`
+    Id   int    `json:"id" jsonschema:"title=UID,description=用户 ID(should be > 0),required"`
+    Name string `json:"name" jsonschema:"title=用户名(Username),required"`
 }
 ```
 
 ## Setup Steps
 
-1. The GUI APP run core program with `-easygui-schema` flag at first, to get `json-schema` of it. 
+1. The GUI APP run core program with `-easygui-schema` flag at first, to get `json-schema` of it.
 
-2. With the schema, GUI APP could render an interface. 
+2. With the schema, GUI APP could render an interface.
 3. When the `Run` button is clicked by user, The GUI APP will run the core program with args set in the interface.
 
 
@@ -115,20 +115,20 @@ go build -o easyGUI-core.exe
 
 
 
-### 2. Cli 
+### 2. Cli
 
 ``` go
 app := &cli.App{
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
+    Flags: []cli.Flag{
+        &cli.BoolFlag{
             Name:        "foo",
             Usage:       "foo greeting",
             Destination: &foo,
         },
-		&cli.PathFlag{
-				Name:        "Path",
-				Destination: &selectedPath,
-		},
+        &cli.PathFlag{
+                Name:        "Path",
+                Destination: &selectedPath,
+        },
     },
     Action: func(context *cli.Context) error {
         fmt.Println("Greet", foo, id, name)
@@ -187,5 +187,13 @@ go build -o cli-demo-core.exe
 # }
 ```
 
+# Thanks
 
+EasyGUI uses the following repositories:
+
+* Wails: https://github.com/wailsapp/wails
+* jsonschema of Go: https://github.com/invopop/jsonschema
+* react-jsonschema-form: https://github.com/rjsf-team/react-jsonschema-form
+* cli: http://github.com/urfave/cli
+* antd: https://github.com/ant-design/ant-design
 
