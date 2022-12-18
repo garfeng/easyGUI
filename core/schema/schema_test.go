@@ -13,6 +13,11 @@ func TestGetSchema(t *testing.T) {
 	fmt.Println(err)
 }
 
+func TestIsNil(t *testing.T) {
+	var v interface{} = "ddd"
+	fmt.Println(v == nil)
+}
+
 type TestUser struct {
 	ID          int                    `json:"id"`
 	Name        string                 `json:"name" jsonschema:"title=the name,description=The name of a friend,example=joe,example=lucy,default=alex"`

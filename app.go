@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/garfeng/easyGUI/core/model"
+	"github.com/invopop/jsonschema"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"io/ioutil"
 	"os"
@@ -19,7 +20,9 @@ import (
 type App struct {
 	ctx context.Context
 
-	AppInfo string
+	AppInfo   string
+	appInfo   *model.AppInfo
+	appSchema *jsonschema.Schema
 }
 
 // NewApp creates a new App application struct
@@ -30,8 +33,12 @@ func NewApp() *App {
 		app.AppInfo = app.newErrorAppInfo(err)
 		return app
 	}
-
 	app.AppInfo = appInfo
+	app.appInfo = new(model.AppInfo)
+	app.appSchema = new(jsonschema.Schema)
+
+	json.Unmarshal([]byte(appInfo), app.appInfo)
+	json.Unmarshal([]byte(app.appInfo.Schema), app.appSchema)
 	return app
 }
 
@@ -77,7 +84,7 @@ func (a *App) GetCoreExeName() (string, error) {
 	names, _ := w.Readdirnames(-1)
 	for _, v := range names {
 		if strings.Contains(v, "-core") {
-			return v, nil
+			return filepath.Join(dir, v), nil
 		}
 	}
 	return "", errors.New("fail to find core app")
@@ -99,9 +106,10 @@ func (a *App) RunExecCoreWithArgs(args ...string) model.ExecResult {
 		result.Error = err.Error()
 		return result
 	}
-	fmt.Println("coreName:", coreName)
 	cmd := exec.Command(coreName, args...)
 	HideExecWindows(cmd)
+
+	fmt.Println(cmd)
 
 	stdout := bytes.NewBufferString("")
 	stderr := bytes.NewBufferString("")
@@ -120,7 +128,7 @@ func (a *App) RunExecCoreWithArgs(args ...string) model.ExecResult {
 }
 
 func (a *App) GetSchema() (string, error) {
-	result := a.RunExecCoreWithArgs("-schema")
+	result := a.RunExecCoreWithArgs(model.CmdFlagOf(model.FlagSchema))
 	if result.Error == "" {
 		return result.Stdout, nil
 	}
@@ -137,7 +145,36 @@ func (a *App) RunExecCore(cfgName string, param string) model.ExecResult {
 		}
 	}
 
-	return a.RunExecCoreWithArgs("-c", cfgName)
+	if a.appInfo.Type == model.AppType_CfgFile {
+		return a.RunExecCoreWithArgs(model.CmdFlagOf(model.FlagCfgPath), cfgName)
+	} else if a.appInfo.Type == model.AppType_Cli {
+		paramMap := map[string]interface{}{}
+		json.Unmarshal([]byte(param), &paramMap)
+		args := []string{}
+		for k, v := range paramMap {
+			_, find := a.appSchema.Properties.Get(k)
+			if find && v != nil {
+				vs := fmt.Sprint(v)
+				if vs != "" {
+					b, isBool := v.(bool)
+					if !isBool {
+						args = append(args, model.CmdFlagOf(k), vs)
+					} else {
+						if b {
+							args = append(args, model.CmdFlagOf(k))
+						}
+					}
+				}
+			}
+		}
+		return a.RunExecCoreWithArgs(args...)
+	}
+
+	return model.ExecResult{
+		Stdout: "",
+		Stderr: "",
+		Error:  "invalid appType",
+	}
 }
 
 func (a *App) SelectExistConfigFile(oldFilename string) (string, error) {
