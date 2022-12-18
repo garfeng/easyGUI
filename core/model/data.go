@@ -15,6 +15,20 @@ type AppInfo struct {
 type AppOptions struct {
 	AppTitle string `json:"appTitle"`
 	Version  string `json:"version"`
+
+	ButtonSubmitText string `json:"submitButtonText"`
+	ButtonSaveAsText string `json:"buttonSaveAsText"`
+	ButtonLoadText   string `json:"buttonLoadText"`
+}
+
+type RecentData struct {
+	RecentCfgFiles []string `json:"recentCfgFiles"`
+}
+
+type ExecResult struct {
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
+	Error  string `json:"error"`
 }
 
 func LoadJSONObject(name string, v interface{}) error {

@@ -26,6 +26,10 @@ export function LoadJSON(arg1) {
   return window['go']['main']['App']['LoadJSON'](arg1);
 }
 
+export function LoadRecentData() {
+  return window['go']['main']['App']['LoadRecentData']();
+}
+
 export function RunExecCore(arg1, arg2) {
   return window['go']['main']['App']['RunExecCore'](arg1, arg2);
 }
@@ -36,6 +40,10 @@ export function RunExecCoreWithArgs(arg1) {
 
 export function SaveJSON(arg1, arg2) {
   return window['go']['main']['App']['SaveJSON'](arg1, arg2);
+}
+
+export function SaveRecentData(arg1) {
+  return window['go']['main']['App']['SaveRecentData'](arg1);
 }
 
 export function SelectExistConfigFile(arg1) {

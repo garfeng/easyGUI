@@ -51,9 +51,6 @@ func (a *App) GetAppInfo() string {
 }
 
 func (a *App) GetCoreExeName() (string, error) {
-
-	fmt.Println("IS debug：", os.Getenv("GODEBUG"))
-
 	me := os.Args[0]
 
 	myRoot, myAppName := filepath.Split(me)
@@ -95,34 +92,49 @@ func (a *App) IsExist(name string) bool {
 	return true
 }
 
-func (a *App) RunExecCoreWithArgs(args ...string) (string, error) {
+func (a *App) RunExecCoreWithArgs(args ...string) model.ExecResult {
+	result := model.ExecResult{}
 	coreName, err := a.GetCoreExeName()
 	if err != nil {
-		return "", err
+		result.Error = err.Error()
+		return result
 	}
 	fmt.Println("coreName:", coreName)
 	cmd := exec.Command(coreName, args...)
 	HideExecWindows(cmd)
 
-	w := bytes.NewBufferString("")
-	cmd.Stdout = w
+	stdout := bytes.NewBufferString("")
+	stderr := bytes.NewBufferString("")
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 
 	err = cmd.Run()
 	if err != nil {
-		return "", err
+		result.Error = err.Error()
+		return result
 	}
 
-	return w.String(), nil
+	result.Stdout = stdout.String()
+	result.Stderr = stderr.String()
+	return result
 }
 
 func (a *App) GetSchema() (string, error) {
-	return a.RunExecCoreWithArgs("-schema")
+	result := a.RunExecCoreWithArgs("-schema")
+	if result.Error == "" {
+		return result.Stdout, nil
+	}
+	return "", errors.New(result.Error)
 }
 
-func (a *App) RunExecCore(cfgName string, param string) (string, error) {
+func (a *App) RunExecCore(cfgName string, param string) model.ExecResult {
 	err := a.SaveJSON(cfgName, param)
 	if err != nil {
-		return "", err
+		return model.ExecResult{
+			Stdout: "",
+			Stderr: "",
+			Error:  err.Error(),
+		}
 	}
 
 	return a.RunExecCoreWithArgs("-c", cfgName)
@@ -186,4 +198,27 @@ func (a *App) newErrorAppInfo(err error) string {
 	}
 	buff, _ := json.MarshalIndent(info, "", "  ")
 	return string(buff)
+}
+
+const (
+	KRecentFile     = ".recent.json"
+	KDefaultCfgFile = "tmpCfg.json"
+)
+
+func (a *App) LoadRecentData() model.RecentData {
+	buff, err := ioutil.ReadFile(KRecentFile)
+	if err != nil {
+		return model.RecentData{RecentCfgFiles: []string{KDefaultCfgFile}}
+	}
+
+	res := model.RecentData{RecentCfgFiles: []string{}}
+	json.Unmarshal(buff, &res)
+	if len(res.RecentCfgFiles) == 0 {
+		res.RecentCfgFiles = []string{KDefaultCfgFile}
+	}
+	return res
+}
+
+func (a *App) SaveRecentData(data model.RecentData) {
+	model.SaveJSONObject(KRecentFile, data)
 }

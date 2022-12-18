@@ -1,19 +1,117 @@
-# README
+# Simple One page GUI for Go APPs
 
-## About
+【[简体中文](./doc/zh-cn.md)】
 
-This is the official Wails React template.
+Is a tool to provide simple human interface for Go Cmd APPS. 
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+![image-20221218114640444](README.assets/image-20221218114640444.png)
 
-## Live Development
+The UI is defined by `json-schema` :
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+``` json
+{
+    "$ref": "#/$defs/Args",
+    "$defs": {
+        "Args": {
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "title": "UID",
+                    "description": "用户 ID"
+                },
+                "name": {
+                    "type": "string",
+                    "title": "用户名(Username)"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ]
+        }
+    }
+}
+```
 
-## Building
+The `json-schema` is refrected from a struct :
 
-To build a redistributable, production mode package, use `wails build`.
+``` go
+type Args struct {
+    Id   int    `json:"id" jsonschema:"title=UID,description=用户 ID(should be > 0),required"`
+	Name string `json:"name" jsonschema:"title=用户名(Username),required"`
+}
+```
+
+
+
+A simple example: 
+
+``` go
+package main
+
+import (
+	"fmt"
+	"github.com/garfeng/easyGUI/core/model"
+	"github.com/garfeng/easyGUI/core/schema"
+	"log"
+)
+
+type Args struct {
+	Id   int    `json:"id" jsonschema:"title=UID,description=用户 ID(should be > 0),required"`
+	Name string `json:"name" jsonschema:"title=用户名(Username),required"`
+}
+
+func main() {
+	args := &Args{}
+    
+    // If get -schema flags, the program will auto print json-schema
+	err := schema.Parse(args, model.AppOptions{
+		AppTitle:         "Easy GUI Demo",
+		Version:          "v0.0.1",
+		ButtonSubmitText: "运行(Run)",
+		ButtonSaveAsText: "另存为(Save As)",
+		ButtonLoadText:   "加载配置(Load)",
+	})
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	fmt.Println("Add user", args.Id, args.Name)
+}
+
+```
+
+``` shell
+go build -o easyGUI-core.exe
+```
+
+``` shell
+./easyGUI-core.exe --help
+# Usage of ./easyGUI-core.exe:
+#  -c string
+#        config file
+#  -schema
+#        schema flag
+```
+
+``` shell
+./easyGUI-core.exe --schema
+#{
+#  "code": 0,
+#  "schema": "{\"$ref\":\"#/$defs/Args\",\"$defs\":{\"Args\":{\"properties\":{\"id\":{\"type\":\"integer\",\"title\":\"UID\",\"description\":\"用户 ID(should be \\u003e 0)\"},\"name\":{\"type\":\"string\",\"title\":\"用户名(Username)\"}},\"additionalProperties\":false,\"type\":\"object\",\"required\":[\"id\",\"name\"]}}}",
+#  "appOptions": {
+#    "appTitle": "Easy GUI Demo",
+#    "version": "v0.0.1",
+#    "submitButtonText": "运行(Run)",
+#    "buttonSaveAsText": "另存为(Save As)",
+#    "buttonLoadText": "加载配置(Load)"
+#  },
+#  "error": ""
+#}
+```
+
+With the schema, the GUI App could rendering human interface.

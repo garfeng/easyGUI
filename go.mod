@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/invopop/jsonschema v0.7.0
-	github.com/labstack/gommon v0.3.1
 	github.com/wailsapp/wails/v2 v2.2.0
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
 )
@@ -17,6 +16,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/labstack/echo/v4 v4.9.0 // indirect
+	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/leaanthony/go-ansi-parser v1.0.1 // indirect
 	github.com/leaanthony/gosod v1.0.3 // indirect
 	github.com/leaanthony/slicer v1.5.0 // indirect

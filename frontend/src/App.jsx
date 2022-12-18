@@ -2,30 +2,39 @@ import { Component } from 'react';
 import Form from "@rjsf/antd";
 import localValidator from "@rjsf/validator-ajv6";
 import './App.css';
-import { GetAppInfo, LoadJSON, SaveJSON, RunExecCore, SelectExistConfigFile, SelectSaveConfigFile } from "../wailsjs/go/main/App";
+import { GetAppInfo, LoadJSON, SaveJSON, RunExecCore, SelectExistConfigFile, SelectSaveConfigFile, LoadRecentData, SaveRecentData } from "../wailsjs/go/main/App";
 import { WindowSetTitle } from "../wailsjs/runtime";
-import { Button, Col, Divider, Layout, Row, Space, Typography } from 'antd';
+import { Button, Col, Divider, Input, Layout, Row, Space, Typography } from 'antd';
+import { model } from '../wailsjs/go/models';
 
 const { Title } = Typography;
 
-const tmpCfgName = "tmpCfg.json"
 
 export default class App extends Component {
     state = {
         appInfo: {
-            "code": 0,
-            "schemaObj": testSchema,
-            "schema": JSON.stringify(testSchema),
-            "appOptions": {
-                "appTitle": "Easy GUI Demo",
-                "version": "v0.0.1"
+            code: 0,
+            schemaObj: testSchema,
+            schema: JSON.stringify(testSchema),
+            appOptions: {
+                appTitle: "Easy GUI Demo",
+                version: "v0.0.1",
+                buttonLoadText: "",
+                buttonSaveAsText: "",
+                submitButtonText: "",
             },
-            "error": ""
+            error: ""
         },
         formData: {
 
         },
-        currentCfgName: tmpCfgName
+        currentCfgName:"tmpCfg.json",
+
+        execResult: {}
+    }
+
+    recentData = {
+        recentCfgFiles: []
     }
 
     onSubmit = (data, event) => {
@@ -38,6 +47,19 @@ export default class App extends Component {
 
     onExecCoreFinished = (data) => {
         console.log("run result:", data)
+        this.setState({
+            execResult:data
+        })
+    }
+
+    GetLog = () => {
+        var s = "";
+        for (var key in this.state.execResult) {
+            if (this.state.execResult[key]) {
+                s += `${new Date().toLocaleTimeString()} [${key}]: ${this.state.execResult[key]}`
+            }
+        }
+        return s
     }
 
     onExecCoreError = (error) => {
@@ -75,20 +97,22 @@ export default class App extends Component {
         console.log(error)
     }
 
+    onLoadRecentData = (data) => {
+        if (data.recentCfgFiles == null || data.recentCfgFiles.length == 0) {
+            data.recentCfgFiles = ["tmpCfg.json"]
+        }
+
+        this.recentData = data;
+        this.setState({
+            currentCfgName : data.recentCfgFiles[0]
+        })
+
+        LoadJSON(data.recentCfgFiles[0]).then(this.onLoadFormData).catch(this.onLoadFormDataError)
+    }
+
     componentDidMount() {
         GetAppInfo().then(this.onLoadSchema).catch(this.onError)
-        LoadJSON(tmpCfgName).then(this.onLoadFormData).catch(this.onLoadFormDataError)
-        /*
-        {
-        "code": 0,
-        "schema": "{\"$ref\":\"#/$defs/Args\",\"$defs\":{\"Args\":{\"properties\":{\"id\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"}},\"additionalProperties\":false,\"type\":\"object\",\"required\":[\"id\",\"name\"]}}}",
-        "appOptions": {
-            "appTitle": "Easy GUI Demo",
-            "version": "v0.0.1"
-        },
-        "error": ""
-        }
-*/
+        LoadRecentData().then(this.onLoadRecentData).catch(this.onError)
     }
 
     SelectExistConfigFile = () => {
@@ -99,8 +123,16 @@ export default class App extends Component {
         SelectSaveConfigFile(this.state.currentCfgName).then(this.onSelectSaveCfgFile)
     }
 
+    UpdateRecentData = (name) => {
+        if (name != this.state.currentCfgName) {
+            this.recentData.recentCfgFiles.unshift(name);
+            SaveRecentData(this.recentData);
+        }
+    }
+
     onSelectCfgFile = (name) => {
         if (name) {
+            this.UpdateRecentData(name);
             this.setState({
                 currentCfgName: name
             })
@@ -110,32 +142,41 @@ export default class App extends Component {
 
     onSelectSaveCfgFile = (name) => {
         if (name) {
+            this.UpdateRecentData(name);
             this.setState({
                 currentCfgName: name
             })
+            SaveJSON(name, JSON.stringify(this.state.formData))
         }
     }
 
     render() {
+        const appOptions = this.state.appInfo.appOptions;
+        this.UISchema['ui:submitButtonOptions'].submitText = appOptions.submitButtonText || "Run";
         return (
             <Layout>
                 <Layout.Content>
                     <Row>
-                        <Col offset={2} span={20}>
-                            <Title style={{marginTop:"10px"}}>
+                        <Col offset={1} span={22}>
+                            <Title style={{ marginTop: "10px" }}>
                                 {this.state.appInfo.appOptions.appTitle}
                             </Title>
                             <Divider />
                         </Col>
                     </Row>
                     <Row>
-                        <Col offset={2} span={20}>
+                        <Col offset={1} span={11}>
                             <Space>
                                 <div>
                                     <Form schema={this.state.appInfo.schemaObj} validator={localValidator} onSubmit={this.onSubmit} uiSchema={this.UISchema} formData={this.state.formData} />
-                                    <Button type="default" onClick={this.SelectExistConfigFile}>Load Config</Button> <Button type="default" onClick={this.SelectSaveConfigFile}>Save As</Button>
+                                    <Button.Group>
+                                    <Button type="default" onClick={this.SelectExistConfigFile}>{appOptions.buttonLoadText || "Load"}</Button> <Button type="default" onClick={this.SelectSaveConfigFile}>{appOptions.buttonSaveAsText || "Save As"}</Button>
+                                    </Button.Group>
                                 </div>
                             </Space>
+                        </Col>
+                        <Col span={10} offset={1}>
+                            <Input.TextArea placeholder='Log' style={{width:"100%", height:"100%"}} readOnly value={this.GetLog()}/>
                         </Col>
                     </Row>
                 </Layout.Content>

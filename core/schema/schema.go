@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/garfeng/easyGUI/core/model"
@@ -11,7 +12,7 @@ import (
 
 var (
 	isGetSchema = flag.Bool("schema", false, "schema flag")
-	cfgPath     = flag.String("c", "config.json", "config file")
+	cfgPath     = flag.String("c", "", "config file")
 )
 
 func Parse(v interface{}, options model.AppOptions) error {
@@ -21,7 +22,9 @@ func Parse(v interface{}, options model.AppOptions) error {
 		os.Exit(0)
 		return nil
 	}
-
+	if (*cfgPath) == "" {
+		return errors.New("no config file defined")
+	}
 	return model.LoadJSONObject(*cfgPath, v)
 }
 

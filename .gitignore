@@ -6,4 +6,5 @@ vendor/
 yarn.lock
 *.log
 tmpCfg*
+.recent.json
 *.exe
