@@ -116,6 +116,8 @@ func (a *App) RunExecCoreWithArgs(args ...string) model.ExecResult {
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
+	result.Cmd = cmd.String()
+
 	err = cmd.Run()
 	if err != nil {
 		result.Error = err.Error()
@@ -258,4 +260,18 @@ func (a *App) LoadRecentData() model.RecentData {
 
 func (a *App) SaveRecentData(data model.RecentData) {
 	model.SaveJSONObject(KRecentFile, data)
+}
+
+func (a *App) SelectFile(defaultFile string, title string) (string, error) {
+	return runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		DefaultDirectory:           "",
+		DefaultFilename:            defaultFile,
+		Title:                      title,
+		Filters:                    nil,
+		ShowHiddenFiles:            false,
+		CanCreateDirectories:       false,
+		ResolvesAliases:            false,
+		TreatPackagesAsDirectories: false,
+	})
+
 }

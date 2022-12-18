@@ -13,6 +13,7 @@ func main() {
 	foo := false
 	id := 0
 	name := ""
+	selectedPath := ""
 
 	app := &cli.App{
 		Flags: []cli.Flag{
@@ -30,9 +31,14 @@ func main() {
 				Name:        "Name",
 				Destination: &name,
 			},
+			&cli.PathFlag{
+				Name:        "Path",
+				Destination: &selectedPath,
+			},
 		},
 		Action: func(context *cli.Context) error {
-			fmt.Println("Greet", foo, id, name)
+			fmt.Println("Greet", foo, "id =", id, "name =", name)
+			fmt.Println("path =", selectedPath)
 			return nil
 		},
 	}
@@ -43,6 +49,7 @@ func main() {
 		ButtonSubmitText: "Run",
 		ButtonSaveAsText: "Save As",
 		ButtonLoadText:   "Load",
+		RecentFileText:   "近期",
 	})
 	if err != nil {
 		log.Fatal(err)

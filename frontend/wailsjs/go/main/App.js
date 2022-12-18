@@ -50,6 +50,10 @@ export function SelectExistConfigFile(arg1) {
   return window['go']['main']['App']['SelectExistConfigFile'](arg1);
 }
 
+export function SelectFile(arg1, arg2) {
+  return window['go']['main']['App']['SelectFile'](arg1, arg2);
+}
+
 export function SelectSaveConfigFile(arg1) {
   return window['go']['main']['App']['SelectSaveConfigFile'](arg1);
 }

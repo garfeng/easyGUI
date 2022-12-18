@@ -26,4 +26,6 @@ export function SaveRecentData(arg1:model.RecentData):Promise<void>;
 
 export function SelectExistConfigFile(arg1:string):Promise<string>;
 
+export function SelectFile(arg1:string,arg2:string):Promise<string>;
+
 export function SelectSaveConfigFile(arg1:string):Promise<string>;

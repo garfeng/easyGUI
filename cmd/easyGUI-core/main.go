@@ -20,6 +20,7 @@ func main() {
 		ButtonSubmitText: "运行(Run)",
 		ButtonSaveAsText: "另存为(Save As)",
 		ButtonLoadText:   "加载配置(Load)",
+		RecentFileText:   "近期选项",
 	})
 
 	if err != nil {

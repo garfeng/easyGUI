@@ -32,6 +32,9 @@ type AppOptions struct {
 	ButtonSubmitText string `json:"submitButtonText"`
 	ButtonSaveAsText string `json:"buttonSaveAsText"`
 	ButtonLoadText   string `json:"buttonLoadText"`
+	RecentFileText   string `json:"recentFileText"`
+
+	RefuseAdditionalProperties bool `json:"refuseAdditionalProperties"`
 }
 
 type RecentData struct {
@@ -39,9 +42,10 @@ type RecentData struct {
 }
 
 type ExecResult struct {
-	Stdout string `json:"stdout"`
-	Stderr string `json:"stderr"`
-	Error  string `json:"error"`
+	Cmd    string `json:"cmd,omitempty"`
+	Stdout string `json:"stdout,omitempty"`
+	Stderr string `json:"stderr,omitempty"`
+	Error  string `json:"error,omitempty"`
 }
 
 func LoadJSONObject(name string, v interface{}) error {

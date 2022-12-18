@@ -1,9 +1,10 @@
 export namespace model {
 	
 	export class ExecResult {
-	    stdout: string;
-	    stderr: string;
-	    error: string;
+	    cmd?: string;
+	    stdout?: string;
+	    stderr?: string;
+	    error?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ExecResult(source);
@@ -11,6 +12,7 @@ export namespace model {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.cmd = source["cmd"];
 	        this.stdout = source["stdout"];
 	        this.stderr = source["stderr"];
 	        this.error = source["error"];

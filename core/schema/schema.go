@@ -164,6 +164,7 @@ func detectTypeOfCliFlag(f cli.Flag) *baseCliFlag {
 	case *cli.PathFlag:
 		v = f.(*cli.PathFlag)
 		b.Type = "string"
+		b.Format = "data-url"
 	case *cli.StringSliceFlag:
 		v = f.(*cli.StringSliceFlag)
 		b.Type = "array"
